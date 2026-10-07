@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 
 MODEL = "wan-3"
 BASE_URL = "https://argolink.io/v1"
+USER_AGENT = "wan-3-0-api/1.0"              # sent on every request, including upload PUTs
 
 TIERS = ("480p", "720p", "1080p")
 RATIOS = ("21:9", "16:9", "4:3", "1:1", "3:4", "9:16", "adaptive")
@@ -148,7 +149,7 @@ class Wan3:
             self.base_url + path,
             data=None if payload is None else json.dumps(payload).encode(),
             method=method,
-            headers={"Authorization": f"Bearer {self.api_key}",
+            headers={"Authorization": f"Bearer {self.api_key}", "User-Agent": USER_AGENT,
                      **({"Content-Type": "application/json"} if payload is not None else {})},
         )
         try:
@@ -208,7 +209,7 @@ class Wan3:
                                                          "size_bytes": os.path.getsize(path)})
         with open(path, "rb") as fh:
             put = urllib.request.Request(ticket["upload_url"], data=fh.read(), method="PUT",
-                                         headers={"Content-Type": ctype})
+                                         headers={"Content-Type": ctype, "User-Agent": USER_AGENT})
         urllib.request.urlopen(put, timeout=self.timeout).close()
         return ticket["media_url"]
 

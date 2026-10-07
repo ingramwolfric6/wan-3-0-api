@@ -118,6 +118,7 @@ def test_run_submits_polls_and_saves(server, tmp_path):
     assert [r.full_url.rsplit("/v1", 1)[1] for r in server] == [
         "/videos/generations", "/videos/r-9", "/videos/r-9", "/videos/r-9/content"]
     assert server[0].get_header("Authorization") == "Bearer key"
+    assert {r.get_header("User-agent") for r in server} == {"wan-3-0-api/1.0"}
     assert (tmp_path / "a.mp4").read_bytes() == b"MP4DATA"
 
 
@@ -144,6 +145,7 @@ def test_upload_sends_type_and_size(server, tmp_path):
     assert Wan3(api_key="key").upload(str(clip)) == "https://cdn.test/m.mp4"
     assert json.loads(server[0].data) == {"model": "wan-3", "type": "video", "content_type": "video/mp4", "size_bytes": 10}
     assert server[1].get_method() == "PUT" and server[1].get_header("Authorization") is None
+    assert server[1].get_header("User-agent") == "wan-3-0-api/1.0"
 
 
 def test_cli_dry_run_uses_placeholders_and_sends_nothing(monkeypatch, capsys):
